@@ -60,7 +60,7 @@ USING (
       SAFE_CAST(id AS STRING),
       SAFE_CAST(account_id AS STRING),
       SAFE_CAST(campaign_id AS STRING),
-      SAFE_CAST(ad_set_id AS STRING),
+      SAFE_CAST(adset_id AS STRING),
       SAFE_CAST(updated_time AS STRING),
       SAFE_CAST(created_time AS STRING),
       SAFE_CAST(name AS STRING),
