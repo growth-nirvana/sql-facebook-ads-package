@@ -30,6 +30,7 @@ IF table_exists THEN
     clicks INT64,
     impressions INT64,
     spend FLOAT64,
+    run_id INT64,
     _fivetran_synced TIMESTAMP
   );
 
@@ -98,6 +99,7 @@ IF table_exists THEN
       clicks,
       impressions,
       spend,
+      run_id,
       _fivetran_synced
     )
     SELECT
@@ -112,6 +114,7 @@ IF table_exists THEN
       SAFE_CAST(clicks AS INT64),
       SAFE_CAST(impressions AS INT64),
       SAFE_CAST(spend AS FLOAT64),
+      batch_id as run_id,
       CURRENT_TIMESTAMP() AS _fivetran_synced
     FROM latest_batch;
 
