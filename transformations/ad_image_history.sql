@@ -1,7 +1,7 @@
 -- adimages_history
 -- SCD Type 2 Table for Facebook Ads Ad Images
 {% assign target_dataset = vars.target_dataset_id %}
-{% assign target_table_id = 'adimages_history' %}
+{% assign target_table_id = 'ad_image_history' %}
 
 {% assign source_dataset = vars.source_dataset_id %}
 {% assign source_table_id = 'adimages' %}
