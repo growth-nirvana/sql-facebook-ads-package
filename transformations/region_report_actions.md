@@ -1,30 +1,34 @@
 # Region Report Actions Table
 
-This table contains Facebook Ads reporting data at the region level, with one row per ad, date, region, action type, and account. It provides action count metrics for each ad within a specific region, enabling detailed analysis of actions by geographic area.
+This table contains pivoted action data from Facebook Ads region-level reporting, specifically unnesting the `actions` JSON array from the region report source. Each row represents a single action type and its associated metrics for a given ad, date, account, and region.
 
 ## Table Structure
 
-| Column         | Type      | Description                                                                 |
-|----------------|-----------|-----------------------------------------------------------------------------|
-| ad_id          | STRING    | The unique identifier for the Facebook Ad                                   |
-| date           | DATE      | The reporting date for the record                                           |
-| account_id     | STRING    | The ID of the account the ad belongs to                                     |
-| action_type    | STRING    | The type of action (e.g., "link_click", "purchase")                       |
-| action_count   | INT64     | The count of the specified action type                                      |
-| region         | STRING    | The geographic region for the record                                        |
-| tenant         | STRING    | Tenant identifier (for multi-tenant environments)                           |
-| _gn_id         | STRING    | Hash of key dimensions for deduplication and uniqueness                     |
-| _gn_synced     | TIMESTAMP | Timestamp of when the record was last synced                                |
+| Column      | Type      | Description                                                                 |
+|-------------|-----------|-----------------------------------------------------------------------------|
+| ad_id       | STRING    | The unique identifier for the Facebook Ad                                   |
+| date        | DATE      | The reporting date for the record                                           |
+| _gn_id      | STRING    | Hash of key dimensions for deduplication and uniqueness                     |
+| _gn_synced  | TIMESTAMP | Timestamp of when the record was last synced                                |
+| account_id  | STRING    | The ID of the account the ad belongs to                                     |
+| action_type | STRING    | The type of action (e.g., `link_click`, `purchase`, etc.)                   |
+| value       | FLOAT64   | The count or value associated with the action                               |
+| inline      | FLOAT64   | Inline value for the action, if present                                     |
+| _7_d_click  | FLOAT64   | 7-day click attribution value, if present                                   |
+| _1_d_view   | FLOAT64   | 1-day view attribution value, if present                                    |
+| region      | STRING    | The geographic region for the record                                        |
+| tenant      | STRING    | Tenant identifier (for multi-tenant environments)                           |
 
 ## How to Use This Table
 
 - **Regional Action Analysis**: Aggregate or filter by `region`, `ad_id`, `account_id`, `date`, or `action_type` to analyze actions by region.
-- **KPI Tracking**: Use `action_count` to calculate total or average counts for specific actions in each region.
+- **KPI Tracking**: Use `value` to calculate total or average counts/values for specific actions in each region.
 - **Join with Dimensions**: Join with ad, campaign, or account dimension tables using `ad_id` and `account_id` for richer analysis.
 - **Tenant Filtering**: Use the `tenant` column to filter results for specific clients or business units in multi-tenant environments.
 
 ## Notes
 
-- The `_gn_id` column is a deterministic hash of key dimensions (`ad_id`, `date`, `account_id`, `region`, `action_type`) for uniqueness and deduplication.
+- The `_gn_id` column is a deterministic hash of key dimensions (`ad_id`, `date`, `account_id`, `action_type`, `region`) for uniqueness and deduplication.
 - All fields used in the hash are cast to STRING for type safety and consistency.
+- All JSON fields are safely extracted and cast to their appropriate types.
 - The table is designed for easy joins with other Facebook Ads reporting and dimension tables. 
