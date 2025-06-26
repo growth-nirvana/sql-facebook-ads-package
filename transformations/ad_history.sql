@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS `{{target_dataset}}.{{target_table_id}}` (
   account_id INT64,
   campaign_id INT64,
   ad_set_id INT64,
+  creative_id STRING,
   updated_time STRING,
   created_time STRING,
   name STRING,
@@ -33,10 +34,17 @@ CREATE TABLE IF NOT EXISTS `{{target_dataset}}.{{target_table_id}}` (
   _gn_id STRING
 );
 
+ALTER TABLE `{{source_dataset}}.{{source_table_id}}`
+  ADD COLUMN IF NOT EXISTS creative STRING;
+
+ALTER TABLE `{{target_dataset}}.{{target_table_id}}`
+  ADD COLUMN IF NOT EXISTS creative_id STRING;
+
 -- Extract latest snapshot from source
 CREATE TEMP TABLE latest_snapshot AS
 SELECT
   *,
+  JSON_EXTRACT_SCALAR(creative, '$.id') AS creative_id,
   ROW_NUMBER() OVER (PARTITION BY CAST(id AS INT64) ORDER BY updated_time DESC) AS rn
 FROM `{{source_dataset}}.{{source_table_id}}`;
 
@@ -48,6 +56,7 @@ USING (
     CAST(account_id AS INT64) AS account_id,
     CAST(campaign_id AS INT64) AS campaign_id,
     CAST(adset_id AS INT64) AS ad_set_id,
+    creative_id,
     updated_time,
     created_time,
     name,
@@ -61,6 +70,7 @@ USING (
       SAFE_CAST(account_id AS STRING),
       SAFE_CAST(campaign_id AS STRING),
       SAFE_CAST(adset_id AS STRING),
+      SAFE_CAST(creative_id AS STRING),
       SAFE_CAST(updated_time AS STRING),
       SAFE_CAST(created_time AS STRING),
       SAFE_CAST(name AS STRING),
@@ -77,6 +87,7 @@ WHEN MATCHED AND
     SAFE_CAST(target.account_id AS STRING),
     SAFE_CAST(target.campaign_id AS STRING),
     SAFE_CAST(target.ad_set_id AS STRING),
+    SAFE_CAST(target.creative_id AS STRING),
     SAFE_CAST(target.updated_time AS STRING),
     SAFE_CAST(target.created_time AS STRING),
     SAFE_CAST(target.name AS STRING),
@@ -88,6 +99,7 @@ WHEN MATCHED AND
     SAFE_CAST(source.account_id AS STRING),
     SAFE_CAST(source.campaign_id AS STRING),
     SAFE_CAST(source.ad_set_id AS STRING),
+    SAFE_CAST(source.creative_id AS STRING),
     SAFE_CAST(source.updated_time AS STRING),
     SAFE_CAST(source.created_time AS STRING),
     SAFE_CAST(source.name AS STRING),
@@ -99,10 +111,10 @@ WHEN MATCHED AND
     is_current = FALSE
 WHEN NOT MATCHED BY TARGET
   THEN INSERT (
-    id, account_id, campaign_id, ad_set_id, updated_time, created_time, name, effective_status, tenant, effective_from, effective_to, is_current, _gn_id
+    id, account_id, campaign_id, ad_set_id, creative_id, updated_time, created_time, name, effective_status, tenant, effective_from, effective_to, is_current, _gn_id
   )
   VALUES (
-    source.id, source.account_id, source.campaign_id, source.ad_set_id, source.updated_time, source.created_time, source.name, source.effective_status, source.tenant, source.effective_from, source.effective_to, source.is_current, source._gn_id
+    source.id, source.account_id, source.campaign_id, source.ad_set_id, source.creative_id, source.updated_time, source.created_time, source.name, source.effective_status, source.tenant, source.effective_from, source.effective_to, source.is_current, source._gn_id
   );
 
 -- Drop the source table after successful processing
