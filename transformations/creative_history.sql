@@ -95,11 +95,32 @@ USING (
   SELECT
     id,
     account_id,
+    actor_id,
+    asset_feed_spec,
+    authorization_category,
+    body,
+    call_to_action_type,
+    degrees_of_freedom_spec,
+    effective_authorization_category,
+    effective_instagram_media_id,
+    effective_object_story_id,
+    enable_direct_install,
     image_hash,
     image_url,
     instagram_permalink_url,
+    link_og_id,
+    link_url,
     name,
+    object_id,
+    object_story_id,
+    object_story_spec,
+    object_type,
+    status,
+    thumbnail_id,
+    thumbnail_url,
     title,
+    use_page_actor_override,
+    video_id,
     tenant,
     _time_extracted AS effective_from,
     CAST(NULL AS TIMESTAMP) AS effective_to,
@@ -107,11 +128,32 @@ USING (
     TO_HEX(MD5(TO_JSON_STRING([
       SAFE_CAST(id AS STRING),
       SAFE_CAST(account_id AS STRING),
+      SAFE_CAST(actor_id AS STRING),
+      SAFE_CAST(asset_feed_spec AS STRING),
+      SAFE_CAST(authorization_category AS STRING),
+      SAFE_CAST(body AS STRING),
+      SAFE_CAST(call_to_action_type AS STRING),
+      SAFE_CAST(degrees_of_freedom_spec AS STRING),
+      SAFE_CAST(effective_authorization_category AS STRING),
+      SAFE_CAST(effective_instagram_media_id AS STRING),
+      SAFE_CAST(effective_object_story_id AS STRING),
+      SAFE_CAST(enable_direct_install AS STRING),
       SAFE_CAST(image_hash AS STRING),
       SAFE_CAST(image_url AS STRING),
       SAFE_CAST(instagram_permalink_url AS STRING),
+      SAFE_CAST(link_og_id AS STRING),
+      SAFE_CAST(link_url AS STRING),
       SAFE_CAST(name AS STRING),
+      SAFE_CAST(object_id AS STRING),
+      SAFE_CAST(object_story_id AS STRING),
+      SAFE_CAST(object_story_spec AS STRING),
+      SAFE_CAST(object_type AS STRING),
+      SAFE_CAST(status AS STRING),
+      SAFE_CAST(thumbnail_id AS STRING),
+      SAFE_CAST(thumbnail_url AS STRING),
       SAFE_CAST(title AS STRING),
+      SAFE_CAST(use_page_actor_override AS STRING),
+      SAFE_CAST(video_id AS STRING),
       SAFE_CAST(tenant AS STRING)
     ]))) AS _gn_id
   FROM latest_snapshot
@@ -122,21 +164,63 @@ WHEN MATCHED AND
   TO_HEX(MD5(TO_JSON_STRING([
     SAFE_CAST(target.id AS STRING),
     SAFE_CAST(target.account_id AS STRING),
+    SAFE_CAST(target.actor_id AS STRING),
+    SAFE_CAST(target.asset_feed_spec AS STRING),
+    SAFE_CAST(target.authorization_category AS STRING),
+    SAFE_CAST(target.body AS STRING),
+    SAFE_CAST(target.call_to_action_type AS STRING),
+    SAFE_CAST(target.degrees_of_freedom_spec AS STRING),
+    SAFE_CAST(target.effective_authorization_category AS STRING),
+    SAFE_CAST(target.effective_instagram_media_id AS STRING),
+    SAFE_CAST(target.effective_object_story_id AS STRING),
+    SAFE_CAST(target.enable_direct_install AS STRING),
     SAFE_CAST(target.image_hash AS STRING),
     SAFE_CAST(target.image_url AS STRING),
     SAFE_CAST(target.instagram_permalink_url AS STRING),
+    SAFE_CAST(target.link_og_id AS STRING),
+    SAFE_CAST(target.link_url AS STRING),
     SAFE_CAST(target.name AS STRING),
+    SAFE_CAST(target.object_id AS STRING),
+    SAFE_CAST(target.object_story_id AS STRING),
+    SAFE_CAST(target.object_story_spec AS STRING),
+    SAFE_CAST(target.object_type AS STRING),
+    SAFE_CAST(target.status AS STRING),
+    SAFE_CAST(target.thumbnail_id AS STRING),
+    SAFE_CAST(target.thumbnail_url AS STRING),
     SAFE_CAST(target.title AS STRING),
+    SAFE_CAST(target.use_page_actor_override AS STRING),
+    SAFE_CAST(target.video_id AS STRING),
     SAFE_CAST(target.tenant AS STRING)
   ]))) !=
   TO_HEX(MD5(TO_JSON_STRING([
     SAFE_CAST(source.id AS STRING),
     SAFE_CAST(source.account_id AS STRING),
+    SAFE_CAST(source.actor_id AS STRING),
+    SAFE_CAST(source.asset_feed_spec AS STRING),
+    SAFE_CAST(source.authorization_category AS STRING),
+    SAFE_CAST(source.body AS STRING),
+    SAFE_CAST(source.call_to_action_type AS STRING),
+    SAFE_CAST(source.degrees_of_freedom_spec AS STRING),
+    SAFE_CAST(source.effective_authorization_category AS STRING),
+    SAFE_CAST(source.effective_instagram_media_id AS STRING),
+    SAFE_CAST(source.effective_object_story_id AS STRING),
+    SAFE_CAST(source.enable_direct_install AS STRING),
     SAFE_CAST(source.image_hash AS STRING),
     SAFE_CAST(source.image_url AS STRING),
     SAFE_CAST(source.instagram_permalink_url AS STRING),
+    SAFE_CAST(source.link_og_id AS STRING),
+    SAFE_CAST(source.link_url AS STRING),
     SAFE_CAST(source.name AS STRING),
+    SAFE_CAST(source.object_id AS STRING),
+    SAFE_CAST(source.object_story_id AS STRING),
+    SAFE_CAST(source.object_story_spec AS STRING),
+    SAFE_CAST(source.object_type AS STRING),
+    SAFE_CAST(source.status AS STRING),
+    SAFE_CAST(source.thumbnail_id AS STRING),
+    SAFE_CAST(source.thumbnail_url AS STRING),
     SAFE_CAST(source.title AS STRING),
+    SAFE_CAST(source.use_page_actor_override AS STRING),
+    SAFE_CAST(source.video_id AS STRING),
     SAFE_CAST(source.tenant AS STRING)
   ])))
   THEN UPDATE SET
@@ -144,12 +228,12 @@ WHEN MATCHED AND
     is_current = FALSE
 WHEN NOT MATCHED BY TARGET
   THEN INSERT (
-    id, account_id, image_hash, image_url, instagram_permalink_url, name, title, tenant, effective_from, effective_to, is_current, _gn_id
+    id, account_id, actor_id, asset_feed_spec, authorization_category, body, call_to_action_type, degrees_of_freedom_spec, effective_authorization_category, effective_instagram_media_id, effective_object_story_id, enable_direct_install, image_hash, image_url, instagram_permalink_url, link_og_id, link_url, name, object_id, object_story_id, object_story_spec, object_type, status, thumbnail_id, thumbnail_url, title, use_page_actor_override, video_id, tenant, effective_from, effective_to, is_current, _gn_id
   )
   VALUES (
-    source.id, source.account_id, source.image_hash, source.image_url, source.instagram_permalink_url, source.name, source.title, source.tenant, source.effective_from, source.effective_to, source.is_current, source._gn_id
+    source.id, source.account_id, source.actor_id, source.asset_feed_spec, source.authorization_category, source.body, source.call_to_action_type, source.degrees_of_freedom_spec, source.effective_authorization_category, source.effective_instagram_media_id, source.effective_object_story_id, source.enable_direct_install, source.image_hash, source.image_url, source.instagram_permalink_url, source.link_og_id, source.link_url, source.name, source.object_id, source.object_story_id, source.object_story_spec, source.object_type, source.status, source.thumbnail_id, source.thumbnail_url, source.title, source.use_page_actor_override, source.video_id, source.tenant, source.effective_from, source.effective_to, source.is_current, source._gn_id
   );
 
 -- Drop the source table after successful insertion
-DROP TABLE IF EXISTS `{{source_dataset}}.{{source_table_id}}`;
+-- DROP TABLE IF EXISTS `{{source_dataset}}.{{source_table_id}}`;
 END IF; 
