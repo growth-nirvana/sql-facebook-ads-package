@@ -61,7 +61,7 @@ IF table_exists THEN
   ranked_batches AS (
     SELECT *,
       RANK() OVER (ORDER BY batch_id DESC) AS batch_rank
-    FROM ranked_batches
+    FROM batches
   )
   SELECT *
   FROM ranked_batches
