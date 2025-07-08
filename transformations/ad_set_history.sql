@@ -42,14 +42,14 @@ FROM `{{source_dataset}}.{{source_table_id}}`;
 MERGE `{{target_dataset}}.{{target_table_id}}` AS target
 USING (
   SELECT
-    CAST(id AS INT64) AS id,
+    id,
     name,
     CAST(account_id AS INT64) AS account_id,
     updated_time,
     CAST(campaign_id AS INT64) AS campaign_id,
     created_time,
     tenant,
-    TIMESTAMP(updated_time) AS effective_from,
+    _time_extracted AS effective_from,
     CAST(NULL AS TIMESTAMP) AS effective_to,
     TRUE AS is_current,
     TO_HEX(MD5(TO_JSON_STRING([
@@ -65,26 +65,8 @@ USING (
   WHERE rn = 1
 ) AS source
 ON target.id = source.id AND target.is_current = TRUE
-WHEN MATCHED AND
-  TO_HEX(MD5(TO_JSON_STRING([
-    SAFE_CAST(target.id AS STRING),
-    SAFE_CAST(target.name AS STRING),
-    SAFE_CAST(target.account_id AS STRING),
-    SAFE_CAST(target.updated_time AS STRING),
-    SAFE_CAST(target.campaign_id AS STRING),
-    SAFE_CAST(target.created_time AS STRING),
-    SAFE_CAST(target.tenant AS STRING)
-  ]))) !=
-  TO_HEX(MD5(TO_JSON_STRING([
-    SAFE_CAST(source.id AS STRING),
-    SAFE_CAST(source.name AS STRING),
-    SAFE_CAST(source.account_id AS STRING),
-    SAFE_CAST(source.updated_time AS STRING),
-    SAFE_CAST(source.campaign_id AS STRING),
-    SAFE_CAST(source.created_time AS STRING),
-    SAFE_CAST(source.tenant AS STRING)
-  ])))
-  THEN UPDATE SET
+WHEN MATCHED THEN
+  UPDATE SET
     effective_to = source.effective_from,
     is_current = FALSE
 WHEN NOT MATCHED BY TARGET

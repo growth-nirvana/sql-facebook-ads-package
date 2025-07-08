@@ -61,24 +61,8 @@ USING (
   WHERE rn = 1
 ) AS source
 ON target.id = source.id AND target.is_current = TRUE
-WHEN MATCHED AND
-  TO_HEX(MD5(TO_JSON_STRING([
-    SAFE_CAST(target.id AS STRING),
-    SAFE_CAST(target.name AS STRING),
-    SAFE_CAST(target.account_id AS STRING),
-    SAFE_CAST(target.updated_time AS STRING),
-    SAFE_CAST(target.created_time AS STRING),
-    SAFE_CAST(target.tenant AS STRING)
-  ]))) !=
-  TO_HEX(MD5(TO_JSON_STRING([
-    SAFE_CAST(source.id AS STRING),
-    SAFE_CAST(source.name AS STRING),
-    SAFE_CAST(source.account_id AS STRING),
-    SAFE_CAST(source.updated_time AS STRING),
-    SAFE_CAST(source.created_time AS STRING),
-    SAFE_CAST(source.tenant AS STRING)
-  ])))
-  THEN UPDATE SET
+WHEN MATCHED THEN
+  UPDATE SET
     effective_to = source.effective_from,
     is_current = FALSE
 WHEN NOT MATCHED BY TARGET
