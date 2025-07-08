@@ -160,70 +160,8 @@ USING (
   WHERE rn = 1
 ) AS source
 ON target.id = source.id AND target.is_current = TRUE
-WHEN MATCHED AND
-  TO_HEX(MD5(TO_JSON_STRING([
-    SAFE_CAST(target.id AS STRING),
-    SAFE_CAST(target.account_id AS STRING),
-    SAFE_CAST(target.actor_id AS STRING),
-    SAFE_CAST(target.asset_feed_spec AS STRING),
-    SAFE_CAST(target.authorization_category AS STRING),
-    SAFE_CAST(target.body AS STRING),
-    SAFE_CAST(target.call_to_action_type AS STRING),
-    SAFE_CAST(target.degrees_of_freedom_spec AS STRING),
-    SAFE_CAST(target.effective_authorization_category AS STRING),
-    SAFE_CAST(target.effective_instagram_media_id AS STRING),
-    SAFE_CAST(target.effective_object_story_id AS STRING),
-    SAFE_CAST(target.enable_direct_install AS STRING),
-    SAFE_CAST(target.image_hash AS STRING),
-    SAFE_CAST(target.image_url AS STRING),
-    SAFE_CAST(target.instagram_permalink_url AS STRING),
-    SAFE_CAST(target.link_og_id AS STRING),
-    SAFE_CAST(target.link_url AS STRING),
-    SAFE_CAST(target.name AS STRING),
-    SAFE_CAST(target.object_id AS STRING),
-    SAFE_CAST(target.object_story_id AS STRING),
-    SAFE_CAST(target.object_story_spec AS STRING),
-    SAFE_CAST(target.object_type AS STRING),
-    SAFE_CAST(target.status AS STRING),
-    SAFE_CAST(target.thumbnail_id AS STRING),
-    SAFE_CAST(target.thumbnail_url AS STRING),
-    SAFE_CAST(target.title AS STRING),
-    SAFE_CAST(target.use_page_actor_override AS STRING),
-    SAFE_CAST(target.video_id AS STRING),
-    SAFE_CAST(target.tenant AS STRING)
-  ]))) !=
-  TO_HEX(MD5(TO_JSON_STRING([
-    SAFE_CAST(source.id AS STRING),
-    SAFE_CAST(source.account_id AS STRING),
-    SAFE_CAST(source.actor_id AS STRING),
-    SAFE_CAST(source.asset_feed_spec AS STRING),
-    SAFE_CAST(source.authorization_category AS STRING),
-    SAFE_CAST(source.body AS STRING),
-    SAFE_CAST(source.call_to_action_type AS STRING),
-    SAFE_CAST(source.degrees_of_freedom_spec AS STRING),
-    SAFE_CAST(source.effective_authorization_category AS STRING),
-    SAFE_CAST(source.effective_instagram_media_id AS STRING),
-    SAFE_CAST(source.effective_object_story_id AS STRING),
-    SAFE_CAST(source.enable_direct_install AS STRING),
-    SAFE_CAST(source.image_hash AS STRING),
-    SAFE_CAST(source.image_url AS STRING),
-    SAFE_CAST(source.instagram_permalink_url AS STRING),
-    SAFE_CAST(source.link_og_id AS STRING),
-    SAFE_CAST(source.link_url AS STRING),
-    SAFE_CAST(source.name AS STRING),
-    SAFE_CAST(source.object_id AS STRING),
-    SAFE_CAST(source.object_story_id AS STRING),
-    SAFE_CAST(source.object_story_spec AS STRING),
-    SAFE_CAST(source.object_type AS STRING),
-    SAFE_CAST(source.status AS STRING),
-    SAFE_CAST(source.thumbnail_id AS STRING),
-    SAFE_CAST(source.thumbnail_url AS STRING),
-    SAFE_CAST(source.title AS STRING),
-    SAFE_CAST(source.use_page_actor_override AS STRING),
-    SAFE_CAST(source.video_id AS STRING),
-    SAFE_CAST(source.tenant AS STRING)
-  ])))
-  THEN UPDATE SET
+WHEN MATCHED THEN
+  UPDATE SET
     effective_to = source.effective_from,
     is_current = FALSE
 WHEN NOT MATCHED BY TARGET
