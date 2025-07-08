@@ -52,7 +52,7 @@ FROM `{{source_dataset}}.{{source_table_id}}`;
 MERGE `{{target_dataset}}.{{target_table_id}}` AS target
 USING (
   SELECT
-    id,
+    CAST(id AS INT64) AS id,
     CAST(account_id AS INT64) AS account_id,
     CAST(campaign_id AS INT64) AS campaign_id,
     CAST(adset_id AS INT64) AS ad_set_id,

@@ -42,7 +42,7 @@ FROM `{{source_dataset}}.{{source_table_id}}`;
 MERGE `{{target_dataset}}.{{target_table_id}}` AS target
 USING (
   SELECT
-    id,
+    CAST(id AS INT64) AS id,
     name,
     CAST(account_id AS INT64) AS account_id,
     updated_time,

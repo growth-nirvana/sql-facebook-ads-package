@@ -97,46 +97,8 @@ USING (
   WHERE rn = 1
 ) AS source
 ON target.id = source.id AND target.is_current = TRUE
-WHEN MATCHED AND
-  TO_HEX(MD5(TO_JSON_STRING([
-    SAFE_CAST(target.id AS STRING),
-    SAFE_CAST(target.account_id AS STRING),
-    SAFE_CAST(target.created_time AS STRING),
-    SAFE_CAST(target.creatives AS STRING),
-    SAFE_CAST(target.`hash` AS STRING),
-    SAFE_CAST(target.height AS STRING),
-    SAFE_CAST(target.is_associated_creatives_in_adgroups AS STRING),
-    SAFE_CAST(target.name AS STRING),
-    SAFE_CAST(target.original_height AS STRING),
-    SAFE_CAST(target.original_width AS STRING),
-    SAFE_CAST(target.permalink_url AS STRING),
-    SAFE_CAST(target.status AS STRING),
-    SAFE_CAST(target.updated_time AS STRING),
-    SAFE_CAST(target.url AS STRING),
-    SAFE_CAST(target.url_128 AS STRING),
-    SAFE_CAST(target.width AS STRING),
-    SAFE_CAST(target.tenant AS STRING)
-  ]))) !=
-  TO_HEX(MD5(TO_JSON_STRING([
-    SAFE_CAST(source.id AS STRING),
-    SAFE_CAST(source.account_id AS STRING),
-    SAFE_CAST(source.created_time AS STRING),
-    SAFE_CAST(source.creatives AS STRING),
-    SAFE_CAST(source.`hash` AS STRING),
-    SAFE_CAST(source.height AS STRING),
-    SAFE_CAST(source.is_associated_creatives_in_adgroups AS STRING),
-    SAFE_CAST(source.name AS STRING),
-    SAFE_CAST(source.original_height AS STRING),
-    SAFE_CAST(source.original_width AS STRING),
-    SAFE_CAST(source.permalink_url AS STRING),
-    SAFE_CAST(source.status AS STRING),
-    SAFE_CAST(source.updated_time AS STRING),
-    SAFE_CAST(source.url AS STRING),
-    SAFE_CAST(source.url_128 AS STRING),
-    SAFE_CAST(source.width AS STRING),
-    SAFE_CAST(source.tenant AS STRING)
-  ])))
-  THEN UPDATE SET
+WHEN MATCHED THEN
+  UPDATE SET
     effective_to = source.effective_from,
     is_current = FALSE
 WHEN NOT MATCHED BY TARGET
