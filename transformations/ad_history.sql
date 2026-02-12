@@ -1,5 +1,5 @@
 -- ad_history
--- SCD Type 2 Table for Facebook Ads Ads
+-- Table for Facebook Ads Ads
 {% assign target_dataset = vars.target_dataset_id %}
 {% assign target_table_id = 'ad_history' %}
 
@@ -16,7 +16,7 @@ SET table_exists = (
 
 IF table_exists THEN
 
--- Create SCD table if it doesn't exist
+-- Create table if it doesn't exist
 CREATE TABLE IF NOT EXISTS `{{target_dataset}}.{{target_table_id}}` (
   id INT64 NOT NULL,
   account_id INT64,
@@ -28,9 +28,6 @@ CREATE TABLE IF NOT EXISTS `{{target_dataset}}.{{target_table_id}}` (
   name STRING,
   effective_status STRING,
   tenant STRING,
-  effective_from TIMESTAMP,
-  effective_to TIMESTAMP,
-  is_current BOOLEAN,
   _gn_id STRING
 );
 
@@ -48,7 +45,7 @@ SELECT
   ROW_NUMBER() OVER (PARTITION BY CAST(id AS INT64) ORDER BY updated_time DESC) AS rn
 FROM `{{source_dataset}}.{{source_table_id}}`;
 
--- SCD Merge Logic
+-- Merge Logic
 MERGE `{{target_dataset}}.{{target_table_id}}` AS target
 USING (
   SELECT
@@ -62,9 +59,6 @@ USING (
     name,
     effective_status,
     tenant,
-    TIMESTAMP(updated_time) AS effective_from,
-    CAST(NULL AS TIMESTAMP) AS effective_to,
-    TRUE AS is_current,
     TO_HEX(MD5(TO_JSON_STRING([
       SAFE_CAST(id AS STRING),
       SAFE_CAST(account_id AS STRING),
@@ -80,17 +74,25 @@ USING (
   FROM latest_snapshot
   WHERE rn = 1
 ) AS source
-ON target.id = source.id AND target.is_current = TRUE
+ON target.id = source.id
 WHEN MATCHED THEN
   UPDATE SET
-    effective_to = source.effective_from,
-    is_current = FALSE
+    account_id = source.account_id,
+    campaign_id = source.campaign_id,
+    ad_set_id = source.ad_set_id,
+    creative_id = source.creative_id,
+    updated_time = source.updated_time,
+    created_time = source.created_time,
+    name = source.name,
+    effective_status = source.effective_status,
+    tenant = source.tenant,
+    _gn_id = source._gn_id
 WHEN NOT MATCHED BY TARGET
   THEN INSERT (
-    id, account_id, campaign_id, ad_set_id, creative_id, updated_time, created_time, name, effective_status, tenant, effective_from, effective_to, is_current, _gn_id
+    id, account_id, campaign_id, ad_set_id, creative_id, updated_time, created_time, name, effective_status, tenant, _gn_id
   )
   VALUES (
-    source.id, source.account_id, source.campaign_id, source.ad_set_id, source.creative_id, source.updated_time, source.created_time, source.name, source.effective_status, source.tenant, source.effective_from, source.effective_to, source.is_current, source._gn_id
+    source.id, source.account_id, source.campaign_id, source.ad_set_id, source.creative_id, source.updated_time, source.created_time, source.name, source.effective_status, source.tenant, source._gn_id
   );
 
 -- Drop the source table after successful processing

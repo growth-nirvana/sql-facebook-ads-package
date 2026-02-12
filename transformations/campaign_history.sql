@@ -1,5 +1,5 @@
 -- campaign_history
--- SCD Type 2 Table for Facebook Ads Campaigns
+-- Table for Facebook Ads Campaigns
 {% assign target_dataset = vars.target_dataset_id %}
 {% assign target_table_id = 'campaign_history' %}
 
@@ -15,7 +15,7 @@ SET table_exists = (
 );
 
 IF table_exists THEN
--- Create SCD table if it doesn't exist
+-- Create table if it doesn't exist
 CREATE TABLE IF NOT EXISTS `{{target_dataset}}.{{target_table_id}}` (
   id STRING NOT NULL,
   name STRING,
@@ -23,9 +23,6 @@ CREATE TABLE IF NOT EXISTS `{{target_dataset}}.{{target_table_id}}` (
   updated_time STRING,
   created_time STRING,
   tenant STRING,
-  effective_from TIMESTAMP,
-  effective_to TIMESTAMP,
-  is_current BOOLEAN,
   _gn_id STRING
 );
 
@@ -36,7 +33,7 @@ SELECT
   ROW_NUMBER() OVER (PARTITION BY id ORDER BY updated_time DESC) AS rn
 FROM `{{source_dataset}}.{{source_table_id}}`;
 
--- SCD Merge Logic
+-- Merge Logic
 MERGE `{{target_dataset}}.{{target_table_id}}` AS target
 USING (
   SELECT
@@ -46,9 +43,6 @@ USING (
     updated_time,
     created_time,
     tenant,
-    TIMESTAMP(updated_time) AS effective_from,
-    CAST(NULL AS TIMESTAMP) AS effective_to,
-    TRUE AS is_current,
     TO_HEX(MD5(TO_JSON_STRING([
       SAFE_CAST(id AS STRING),
       SAFE_CAST(name AS STRING),
@@ -60,17 +54,21 @@ USING (
   FROM latest_snapshot
   WHERE rn = 1
 ) AS source
-ON target.id = source.id AND target.is_current = TRUE
+ON target.id = source.id
 WHEN MATCHED THEN
   UPDATE SET
-    effective_to = source.effective_from,
-    is_current = FALSE
+    name = source.name,
+    account_id = source.account_id,
+    updated_time = source.updated_time,
+    created_time = source.created_time,
+    tenant = source.tenant,
+    _gn_id = source._gn_id
 WHEN NOT MATCHED BY TARGET
   THEN INSERT (
-    id, name, account_id, updated_time, created_time, tenant, effective_from, effective_to, is_current, _gn_id
+    id, name, account_id, updated_time, created_time, tenant, _gn_id
   )
   VALUES (
-    source.id, source.name, source.account_id, source.updated_time, source.created_time, source.tenant, source.effective_from, source.effective_to, source.is_current, source._gn_id
+    source.id, source.name, source.account_id, source.updated_time, source.created_time, source.tenant, source._gn_id
   );
 
 -- Drop the source table after successful insertion
